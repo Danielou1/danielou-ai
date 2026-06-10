@@ -1,0 +1,68 @@
+{
+  "peripherals": {
+    "USART1": {
+      "base_address": "0x40013800",
+      "description": "Universal synchronous asynchronous receiver transmitter"
+    }
+  },
+  "registers": [
+    {
+      "name": "CR1",
+      "offset": "0x00",
+      "reset_value": "0x00000000",
+      "description": "Control register 1",
+      "fields": [
+        {
+          "bits": "13",
+          "name": "UE",
+          "access": "rw",
+          "description": "USART enable"
+        },
+        {
+          "bits": "12",
+          "name": "M0",
+          "access": "rw",
+          "description": "Word length bit 0"
+        },
+        {
+          "bits": "10",
+          "name": "PCE",
+          "access": "rw",
+          "description": "Parity control enable"
+        },
+        {
+          "bits": "3",
+          "name": "TE",
+          "access": "rw",
+          "description": "Transmitter enable"
+        },
+        {
+          "bits": "2",
+          "name": "RE",
+          "access": "rw",
+          "description": "Receiver enable"
+        }
+      ]
+    },
+    {
+      "name": "BRR",
+      "offset": "0x0C",
+      "reset_value": "0x00000000",
+      "description": "Baud rate register",
+      "fields": [
+        {
+          "bits": "15:4",
+          "name": "DIV_Mantissa",
+          "access": "rw",
+          "description": "mantissa of USARTDIV"
+        },
+        {
+          "bits": "3:0",
+          "name": "DIV_Fraction",
+          "access": "rw",
+          "description": "fraction of USARTDIV"
+        }
+      ]
+    }
+  ]
+}
