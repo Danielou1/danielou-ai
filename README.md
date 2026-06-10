@@ -1,299 +1,117 @@
-# Claw Code
+# danielou-ai 🚀
 
-<p align="center">
-  <a href="https://github.com/code-yeongyu/lazycodex">
-    <img src="https://img.shields.io/badge/LazyCodex-codex%20for%20no--brainers-111111?style=for-the-badge&logo=github&logoColor=white" alt="LazyCodex banner" />
-  </a>
-  <a href="https://github.com/Yeachan-Heo/gajae-code">
-    <img src="https://img.shields.io/badge/Gajae--Code-red--claw%20agent%20harness-B22222?style=for-the-badge&logo=github&logoColor=white" alt="Gajae-Code banner" />
-  </a>
-</p>
+An autonomous, **100% local and private agentic AI assistant** designed specifically for **Embedded Software Engineering** and hardware-software integration. 
 
-<p align="center">
-  <a href="https://github.com/code-yeongyu/lazycodex">
-    <img src="https://opengraph.githubassets.com/lazycodex-card/code-yeongyu/lazycodex" alt="LazyCodex GitHub card" width="280" />
-  </a>
-  <a href="https://github.com/Yeachan-Heo/gajae-code">
-    <img src="https://opengraph.githubassets.com/gajae-code-card/Yeachan-Heo/gajae-code" alt="Gajae-Code GitHub card" width="280" />
-  </a>
-</p>
+This repository is a customized and optimized fork of `ultraworkers/claw-code`, officially rebranded as `danielou-ai`. It runs completely offline on your local machine using **Ollama** as the inference engine, making it fully compliant with professional NDA requirements for hardware development (e.g., at **Limoss GmbH**).
 
-<h3 align="center">start with the real crab-powered harnesses</h3>
+---
 
-<p align="center">
-  <a href="https://github.com/code-yeongyu/lazycodex"><b>github.com/code-yeongyu/lazycodex</b></a>
-  <br/>
-  <a href="https://github.com/Yeachan-Heo/gajae-code"><b>github.com/Yeachan-Heo/gajae-code</b></a>
-</p>
+## 🌟 Core Pillars & Sprint Goals
 
-<p align="center">
-  <a href="https://github.com/code-yeongyu/lazycodex">
-    <img src="https://img.shields.io/badge/Open-LazyCodex-111111?style=flat-square&logo=github&logoColor=white" alt="Open LazyCodex on GitHub" />
-  </a>
-  <a href="https://github.com/Yeachan-Heo/gajae-code">
-    <img src="https://img.shields.io/badge/Open-Gajae--Code-B22222?style=flat-square&logo=github&logoColor=white" alt="Open Gajae-Code on GitHub" />
-  </a>
-</p>
+### 1. Rebranded & Native Windows GNU Build (Axe 1)
+*   The Rust workspace compiles natively into a standalone binary named `danielou.exe` using the MinGW/MSYS2 toolchain (`x86_64-pc-windows-gnu`).
+*   Bypasses heavy MSVC Visual Studio requirements and handles Windows native Schannel TLS (`native-tls`) and syntax highlighting (`syntect` via pure-Rust `fancy-regex`) without complex external C linkages.
+*   Fully integrated globally in Windows `PATH` (via Scoop shims).
 
-<p align="center">
-  <a href="https://discord.gg/GtjhvgjnV">
-    <img src="https://img.shields.io/badge/Discord-join%20the%20harness%20lab-5865F2?style=for-the-badge&logo=discord&logoColor=white" alt="Join the harness lab on Discord" />
-  </a>
-  <a href="https://discord.gg/4Rt79F7dF">
-    <img src="https://img.shields.io/badge/Discord-join%20the%20crab%20tank-5865F2?style=for-the-badge&logo=discord&logoColor=white" alt="Join the crab tank on Discord" />
-  </a>
-</p>
+### 2. Datasheet Parser & Hardware RAG (Axe 2)
+*   **Location:** [`src/parse_datasheet.py`](./src/parse_datasheet.py)
+*   Extracts register lists, offsets, bitfields, access types, and descriptions from semiconductor PDF Reference Manuals (STM32, ESP32, etc.) using `pdfplumber`.
+*   Preserves tabular structures and hexadecimal addresses (`0x4000_0000`) by converting them into structured JSON register maps, ready to be indexed by the agent's local SQLite RAG database.
 
-<p align="center">
-  Join the Discords:
-  <a href="https://discord.gg/GtjhvgjnV"><b>ultraworkers discord</b></a>
-  ·
-  <a href="https://discord.gg/4Rt79F7dF"><b>gajae-code discord</b></a>
-</p>
+### 3. ARM Cortex-M HardFault Decoder (Axe 3)
+*   **Location:** [`src/decode_hardfault.py`](./src/decode_hardfault.py)
+*   Decodes low-level CPU registry crash dumps when debugging STM32 or other Cortex-M systems.
+*   Parses **CFSR** (Configurable Fault Status Register: MMFSR, BFSR, UFSR) and **HFSR** (HardFault Status Register) to pinpoint precise crash causes (e.g., Null pointer dereferencing, division by zero, unaligned access, or invalid state).
+*   Validates memory addresses in **BFAR** and **MMFAR**.
 
-> [!IMPORTANT]
-> **Claw Code is not the serious production project here.**
-> This repository is closer to a museum exhibit than a product pitch, a crustacean-run artifact kept alive by clawed gajaes, swept and labeled by agents, and automatically maintained according to the harnesses above.
->
-> As already described in the project philosophy, this is not meant to be hand-operated like a normal product repo. It is an **agent-managed exhibit**: the harnesses plan, execute, verify, label, and preserve the artifact while the crabs keep the tank running.
->
-> If you want to actually run work, start with **[LazyCodex](https://github.com/code-yeongyu/lazycodex)** or **[Gajae-Code](https://github.com/Yeachan-Heo/gajae-code)**. If you want to inspect the strange little fossil of the Claw Code moment, continue below.
->
-> For the longer public explanation behind this philosophy, see [here](https://x.com/realsigridjin/status/2039472968624185713).
+### 4. Bare-Metal Embedded C Code Generator (Axe 4)
+*   **Location:** [`src/generate_embedded_c.py`](./src/generate_embedded_c.py)
+*   Generates MISRA-C compliant register structure definitions and driver files from the parsed JSON register maps.
+*   **Zero Dynamic Allocation:** Optimized for constrained bare-metal targets.
+*   **Padding Aligned:** Automatically inserts `RESERVED` padding fields into structs to guarantee alignment with hardware memory offsets.
+*   Generates static inline helper functions for bitmask manipulation.
 
-<p align="center">
-  <a href="https://github.com/ultraworkers/claw-code">ultraworkers/claw-code</a>
-  ·
-  <a href="./USAGE.md">Usage</a>
-  ·
-  <a href="./rust/README.md">Rust workspace</a>
-  ·
-  <a href="./PARITY.md">Parity</a>
-  ·
-  <a href="./ROADMAP.md">Roadmap</a>
-  ·
-  <a href="./CONTRIBUTING.md">Contributing</a>
-  ·
-  <a href="./SECURITY.md">Security</a>
-  ·
-  <a href="https://discord.gg/5TUQKqFWd">UltraWorkers Discord</a>
-</p>
+---
 
-<p align="center">
-  <a href="https://star-history.com/#ultraworkers/claw-code&Date">
-    <picture>
-      <source media="(prefers-color-scheme: dark)" srcset="https://api.star-history.com/svg?repos=ultraworkers/claw-code&type=Date&theme=dark" />
-      <source media="(prefers-color-scheme: light)" srcset="https://api.star-history.com/svg?repos=ultraworkers/claw-code&type=Date" />
-      <img alt="Star history for ultraworkers/claw-code" src="https://api.star-history.com/svg?repos=ultraworkers/claw-code&type=Date" width="600" />
-    </picture>
-  </a>
-</p>
+## 🛠️ Repository Architecture
 
-<p align="center">
-  <img src="assets/claw-hero.jpeg" alt="Claw Code" width="300" />
-</p>
+*   **`rust/`**: Canonical Rust workspace containing the `danielou` CLI agent core.
+*   **`src/`**: Companion Python toolkit containing hardware analysis scripts (`parse_datasheet.py`, `decode_hardfault.py`, `generate_embedded_c.py`).
+*   **`scratch/`**: Safe local folder containing test files and mock register configurations (e.g., [`usart_test.json`](./scratch/usart_test.json)).
 
-Claw Code is the public Rust implementation of the `claw` CLI agent harness.
-The canonical implementation lives in [`rust/`](./rust), and the current source of truth for this repository is **ultraworkers/claw-code**.
+---
 
-> [!IMPORTANT]
-> Start with [`USAGE.md`](./USAGE.md) for build, auth, CLI, session, and parity-harness workflows. For file submission/navigation questions, see [Navigation and file context](./docs/navigation-file-context.md). For local OpenAI-compatible models and offline skill installs, see [Local OpenAI-compatible providers and skills setup](./docs/local-openai-compatible-providers.md). Windows users can jump to the PowerShell-first [Windows install and release quickstart](./docs/windows-install-release.md). Make `claw doctor` your first health check after building, use [`rust/README.md`](./rust/README.md) for crate-level details, read [`PARITY.md`](./PARITY.md) for the current Rust-port checkpoint, and see [`docs/container.md`](./docs/container.md) for the container-first workflow.
->
-> **ACP / Zed status:** `claw-code` does not ship an ACP/Zed daemon or JSON-RPC entrypoint yet. Run `claw acp` (or `claw --acp`) for the current status instead of guessing from source layout; `claw acp serve` is currently a discoverability alias only, returns status with exit code 0, and real ACP support remains tracked separately in `ROADMAP.md`. For the public JSON contract, see [`docs/g011-acp-json-rpc-status-contract.md`](./docs/g011-acp-json-rpc-status-contract.md).
+## 🚀 Quick Start (Windows PowerShell)
 
-## Current repository shape
-
-- **`rust/`** — canonical Rust workspace and the `claw` CLI binary
-- **`USAGE.md`** — task-oriented usage guide for the current product surface
-- **`PARITY.md`** — Rust-port parity status and migration notes
-- **`ROADMAP.md`** — active roadmap and cleanup backlog
-- **`PHILOSOPHY.md`** — project intent and system-design framing
-- **`src/` + `tests/`** — companion Python/reference workspace and audit helpers; not the primary runtime surface
-
-## Quick start
-
-> [!NOTE]
-> [!WARNING]
-> **`cargo install claw-code` installs the wrong thing.** The `claw-code` crate on crates.io is a deprecated stub that places `claw-code-deprecated.exe` — not `claw`. Running it only prints `"claw-code has been renamed to agent-code"`. **Do not use `cargo install claw-code`.** Either build from source (this repo) or install the upstream binary:
-> ```bash
-> cargo install agent-code   # upstream binary — installs 'agent.exe' (Windows) / 'agent' (Unix), NOT 'agent-code'
-> ```
-> This repo (`ultraworkers/claw-code`) is **build-from-source only** — follow the steps below.
-
-```bash
-# 1. Clone and build
-git clone https://github.com/ultraworkers/claw-code
-cd claw-code/rust
-cargo build --workspace
-
-# 2. Set your API key (Anthropic API key — not a Claude subscription)
-export ANTHROPIC_API_KEY="sk-ant-..."
-
-# 3. Verify everything is wired correctly
-./target/debug/claw doctor
-
-# 4. Run a prompt
-./target/debug/claw prompt "say hello"
-
-# 5. Start an interactive session
-./target/debug/claw
-```
-
-> [!NOTE]
-> **Windows (PowerShell):** the binary is `claw.exe`, not `claw`. Use `.\target\debug\claw.exe` or run `cargo run -- prompt "say hello"` to skip the path lookup.
-
-### Windows setup
-
-**PowerShell is a supported Windows path.** Use whichever shell works for you. The common onboarding issues on Windows are:
-
-1. **Install Rust first** — download from <https://rustup.rs/> and run the installer. Close and reopen your terminal when it finishes.
-2. **Verify Rust is on PATH:**
-   ```powershell
-   cargo --version
-   ```
-   If this fails, reopen your terminal or run the PATH setup from the Rust installer output, then retry.
-3. **Clone and build** (works in PowerShell, Git Bash, or WSL):
-   ```powershell
-   git clone https://github.com/ultraworkers/claw-code
-   cd claw-code/rust
-   cargo build --workspace
-   ```
-4. **Run** (PowerShell — note `.exe` and backslash):
-   ```powershell
-   $env:ANTHROPIC_API_KEY = "sk-ant-..."
-   .\target\debug\claw.exe prompt "say hello"
-   ```
-
-For release ZIPs, PATH setup, provider switching, and notification smoke checks, see [`docs/windows-install-release.md`](./docs/windows-install-release.md).
-
-**Git Bash / WSL** are optional alternatives, not requirements. If you prefer bash-style paths (`/c/Users/you/...` instead of `C:\Users\you\...`), Git Bash (ships with Git for Windows) works well. In Git Bash, the `MINGW64` prompt is expected and normal — not a broken install.
-
-## Post-build: locate the binary and verify
-
-After running `cargo build --workspace`, the `claw` binary is built but **not** automatically installed to your system. Here's where to find it and how to verify the build succeeded.
-
-### Binary location
-
-After `cargo build --workspace` in `claw-code/rust/`:
-
-**Debug build (default, faster compile):**
-- **macOS/Linux:** `rust/target/debug/claw`
-- **Windows:** `rust/target/debug/claw.exe`
-
-**Release build (optimized, slower compile):**
-- **macOS/Linux:** `rust/target/release/claw`
-- **Windows:** `rust/target/release/claw.exe`
-
-If you ran `cargo build` without `--release`, the binary is in the `debug/` folder.
-
-### Verify the build succeeded
-
-Test the binary directly using its path:
-
-```bash
-# macOS/Linux (debug build)
-./rust/target/debug/claw --help
-./rust/target/debug/claw doctor
-
-# Windows PowerShell (debug build)
-.\rust\target\debug\claw.exe --help
-.\rust\target\debug\claw.exe doctor
-```
-
-PowerShell smoke commands that do not require live credentials:
-
+### 1. Prerequisites
+Ensure you have **Ollama** installed on your system. If not, install it using Scoop:
 ```powershell
-$env:CLAW_CONFIG_HOME = Join-Path $env:TEMP "claw config home"
-New-Item -ItemType Directory -Force -Path $env:CLAW_CONFIG_HOME | Out-Null
-Remove-Item Env:\ANTHROPIC_API_KEY, Env:\ANTHROPIC_AUTH_TOKEN, Env:\OPENAI_API_KEY -ErrorAction SilentlyContinue
-.\rust\target\debug\claw.exe help
-.\rust\target\debug\claw.exe status
-.\rust\target\debug\claw.exe config env
-.\rust\target\debug\claw.exe doctor
+scoop install ollama
 ```
 
-If these commands succeed, the build is working. `claw doctor` is your first health check — it validates your API key, model access, and tool configuration.
+### 2. Configure Local Inference
+Save the `OLLAMA_HOST` variable permanently to route all model queries through your local Ollama server:
+```powershell
+[Environment]::SetEnvironmentVariable("OLLAMA_HOST", "http://127.0.0.1:11434", "User")
+```
 
-### Optional: Add to PATH
+Download a powerful local code model (reopening your terminal first):
+```powershell
+# Recommended for standard GPUs/VRAM (7B parameters)
+ollama run qwen2.5-coder:7b
 
-If you want to run `claw` from any directory without the full path, choose one of these approaches:
+# Recommended for CPU-only or integrated graphics (1.5B parameters)
+ollama run qwen2.5-coder:1.5b
+```
 
-**Option 1: Symlink (macOS/Linux)**
+### 3. Run the Agent Globally
+The compiled binary has been shimmed under Scoop. Simply run it from any folder:
+```powershell
+# Check version and latest Git SHA
+danielou --version
+
+# Run diagnostic tool
+danielou doctor
+
+# Start the interactive agent chat
+danielou
+```
+
+---
+
+## 💡 Usage Examples
+
+### Parse a PDF Datasheet
 ```bash
-ln -s $(pwd)/rust/target/debug/claw /usr/local/bin/claw
+python src/parse_datasheet.py path/to/stm32_usart.pdf -s 120 -e 125 -o scratch/usart.json
 ```
-Then reload your shell and test:
+
+### Generate C Header from JSON Map
 ```bash
-claw --help
+python src/generate_embedded_c.py scratch/usart.json USART1 -o scratch/usart1_regs.h
 ```
 
-**Option 2: Use `cargo install` (all platforms)**
-
-Build and install to Cargo's default location (`~/.cargo/bin/`, which is usually on PATH):
+### Decode a CPU HardFault
 ```bash
-# From the claw-code/rust/ directory
-cargo install --path . --force
+python src/decode_hardfault.py --cfsr 0x00010000 --hfsr 0x40000000
+```
+*Output:*
+```text
+====================================================
+        ARM CORTEX-M HARDFAULT CRASH DECODER        
+====================================================
+CFSR  : 0x00010000
+HFSR  : 0x40000000
+----------------------------------------------------
+[*] HFSR Details:
+  [FORCED] Forced HardFault: Fault escalated because handler was disabled or blocked.
 
-# Then from anywhere
-claw --help
+[*] Usage Faults (UFSR):
+  [UNDEFINSTR] Undefined instruction: CPU tried to execute an unknown instruction.
+====================================================
 ```
 
-**Option 3: Update shell profile (bash/zsh)**
+---
 
-Add this line to `~/.bashrc` or `~/.zshrc`:
-```bash
-export PATH="$(pwd)/rust/target/debug:$PATH"
-```
-
-Reload your shell:
-```bash
-source ~/.bashrc  # or source ~/.zshrc
-claw --help
-```
-
-### Troubleshooting
-
-- **"command not found: claw"** — The binary is in `rust/target/debug/claw`, but it's not on your PATH. Use the full path `./rust/target/debug/claw` or symlink/install as above.
-- **"permission denied"** — On macOS/Linux, you may need `chmod +x rust/target/debug/claw` if the executable bit isn't set (rare).
-- **Debug vs. release** — If the build is slow, you're in debug mode (default). Add `--release` to `cargo build` for faster runtime, but the build itself will take 5–10 minutes.
-
-> [!NOTE]
-> **Auth:** claw requires an **API key** (`ANTHROPIC_API_KEY`, `OPENAI_API_KEY`, etc.) — Claude subscription login is not a supported auth path.
-
-Run the workspace test suite after verifying the binary works:
-
-```bash
-cd rust
-cargo test --workspace
-```
-
-## Documentation map
-
-- [`USAGE.md`](./USAGE.md) — quick commands, auth, sessions, config, parity harness
-- [`docs/navigation-file-context.md`](./docs/navigation-file-context.md) — terminal navigation, scrollback, `@path` file context, attachments, and secret-safety guidance
-- [`docs/local-openai-compatible-providers.md`](./docs/local-openai-compatible-providers.md) — Ollama/llama.cpp/vLLM setup, Claw multi-provider positioning, and local skills install checks
-- [`docs/windows-install-release.md`](./docs/windows-install-release.md) — PowerShell-first install, release artifact, provider switching, and Windows/WSL notification smoke paths
-- [`rust/README.md`](./rust/README.md) — crate map, CLI surface, features, workspace layout
-- [`PARITY.md`](./PARITY.md) — parity status for the Rust port
-- [`rust/MOCK_PARITY_HARNESS.md`](./rust/MOCK_PARITY_HARNESS.md) — deterministic mock-service harness details
-- [`ROADMAP.md`](./ROADMAP.md) — active roadmap and open cleanup work
-- [`docs/g004-events-reports-contract.md`](./docs/g004-events-reports-contract.md) — Stream 2 lane event/report contract guidance for consumers
-- [`PHILOSOPHY.md`](./PHILOSOPHY.md) — why the project exists and how it is operated
-- [`CONTRIBUTING.md`](./CONTRIBUTING.md), [`SECURITY.md`](./SECURITY.md), [`SUPPORT.md`](./SUPPORT.md), and [`CODE_OF_CONDUCT.md`](./CODE_OF_CONDUCT.md) — contribution, vulnerability-reporting, support, and community policies
-- [`LICENSE`](./LICENSE) — MIT license for this repository
-
-## Ecosystem
-
-Claw Code is built in the open alongside the broader UltraWorkers toolchain:
-
-- [clawhip](https://github.com/Yeachan-Heo/clawhip)
-- [oh-my-openagent](https://github.com/code-yeongyu/oh-my-openagent)
-- [oh-my-claudecode](https://github.com/Yeachan-Heo/oh-my-claudecode)
-- [oh-my-codex](https://github.com/Yeachan-Heo/oh-my-codex)
-- [gajae-code](https://github.com/Yeachan-Heo/gajae-code)
-- [UltraWorkers Discord](https://discord.gg/5TUQKqFWd)
-
-## Ownership / affiliation disclaimer
-
-- This repository does **not** claim ownership of the original Claude Code source material.
-- This repository is **not affiliated with, endorsed by, or maintained by Anthropic**.
+## 🔒 Security & Safety
+Because `danielou` runs with full terminal access, it operates under an explicit **Workspace-Write Permission Mode**. The agent will always prompt you for authorization before executing shell commands (`bash` tool) or editing critical files. You remain in complete control of your workspace.
