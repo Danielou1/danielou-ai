@@ -2,7 +2,7 @@
 
 An autonomous, **100% local and private agentic AI assistant** designed specifically for **Embedded Software Engineering** and hardware-software integration. 
 
-This repository is a customized and optimized fork of `ultraworkers/claw-code`, officially rebranded as `danielou-ai`. It runs completely offline on your local machine using **Ollama** as the inference engine, making it fully compliant with professional NDA requirements for hardware development (e.g., at **Limoss GmbH**).
+This repository is a customized and optimized fork of `ultraworkers/claw-code`, officially rebranded as `danielou-ai`. It runs completely offline on your local machine using **Ollama** as the inference engine, making it fully compliant with professional NDA requirements for proprietary hardware development.
 
 ---
 
