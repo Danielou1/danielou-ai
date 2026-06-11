@@ -163,8 +163,27 @@ def generate_header(data, peripheral_name):
     
     # Base Address definition
     lines.append(f"/* Peripheral Base Address */")
-    lines.append(f"#define {peripheral_name}_BASE_ADDR ({base_addr}U)")
+    lines.append(f"#ifdef MOCK_HARDWARE")
+    lines.append(f"  extern uint8_t mock_{peripheral_name.lower()}_memory[];")
+    lines.append(f"  #define {peripheral_name}_BASE_ADDR ((uintptr_t)mock_{peripheral_name.lower()}_memory)")
+    lines.append(f"#else")
+    lines.append(f"  #define {peripheral_name}_BASE_ADDR ({base_addr}U)")
+    lines.append(f"#endif")
     lines.append(f"#define {peripheral_name} (({peripheral_name}_TypeDef *){peripheral_name}_BASE_ADDR)")
+    lines.append("")
+    
+    # Mock Reset helper function
+    lines.append(f"#ifdef MOCK_HARDWARE")
+    lines.append(f"/**")
+    lines.append(f"  * @brief Reset all mock registers for {peripheral_name} to 0")
+    lines.append(f"  */")
+    lines.append(f"static inline void {peripheral_name.lower()}_mock_reset(void) {{")
+    lines.append(f"    uint8_t *ptr = mock_{peripheral_name.lower()}_memory;")
+    lines.append(f"    for (unsigned int i = 0; i < sizeof({peripheral_name}_TypeDef); i++) {{")
+    lines.append(f"        ptr[i] = 0;")
+    lines.append(f"    }}")
+    lines.append(f"}}")
+    lines.append(f"#endif")
     lines.append("")
     
     # Generate bitfield constants
