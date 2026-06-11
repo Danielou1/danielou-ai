@@ -49,6 +49,9 @@ class DatasheetParser:
         # Look for keywords like "Register", "Offset", "Reset value"
         is_register_page = any(kw in text for kw in ["Register", "Offset", "Reset value", "bitfield"])
         
+        if is_register_page:
+            self._parse_prose_page_registers(text)
+            
         # Extract tables
         tables = page.extract_tables()
         if not tables:
@@ -96,6 +99,79 @@ class DatasheetParser:
             if any(h in ["register", "offset", "description"] for h in headers):
                 self._parse_register_map_table(table)
 
+    def _parse_prose_page_registers(self, text):
+        """Parse register information and bitfields from prose text (STM32 style)."""
+        # Find register name
+        reg_match = re.search(r'register\s+\(([A-Z0-9_]+)\)', text, re.IGNORECASE)
+        if not reg_match:
+            reg_match = re.search(r'register\s+([A-Z0-9_]{3,20})', text, re.IGNORECASE)
+        if not reg_match:
+            reg_match = re.search(r'\(([A-Z0-9_]+)\)', text)
+        if not reg_match:
+            reg_match = re.search(r'\b([A-Z0-9]{3,15}_[A-Z0-9_]{1,15})\b', text)
+            
+        if not reg_match:
+            return
+            
+        reg_name = reg_match.group(1)
+        
+        # Find offset
+        offset_match = re.search(r'(?:Address offset|Offset):\s*(0x[0-9A-Fa-f]+)', text, re.IGNORECASE)
+        if not offset_match:
+            return
+        offset = offset_match.group(1)
+        
+        # Find reset value
+        reset_match = re.search(r'Reset value:\s*(0x[0-9A-Fa-f\s]+|[0-9\sXx]+)', text, re.IGNORECASE)
+        reset_val = reset_match.group(1).strip() if reset_match else ""
+        
+        # Find or create register
+        register = next((r for r in self.registers if r["name"] == reg_name), None)
+        if not register:
+            register = {
+                "name": reg_name,
+                "offset": offset,
+                "reset_value": reset_val,
+                "description": f"Extracted from prose page describing {reg_name}",
+                "fields": []
+            }
+            self.registers.append(register)
+        else:
+            if offset and not register["offset"]:
+                register["offset"] = offset
+            if reset_val and not register["reset_value"]:
+                register["reset_value"] = reset_val
+
+        # Parse bitfields using regex
+        pattern = r'(?:Bits|Bit)\s+(\d+(?::\d+)?)\s+([A-Za-z0-9_]+(?:\[\d+:\d+\])?):?\s*(.*?)(?=(?:Bits|Bit)\s+\d+(?::\d+)?|\d+\.\d+\.\d+|\bAddress offset:|\Z)'
+        matches = re.findall(pattern, text, re.DOTALL)
+        
+        if matches:
+            print(f"[+] Found {len(matches)} prose bitfields for {reg_name}")
+            for m in matches:
+                bits, name, desc = m
+                desc_clean = desc.strip().replace('\n', ' ')
+                
+                # Clean name if it has brackets
+                f_name = name
+                if "reserve" in name.lower() or "reserve" in desc_clean.lower():
+                    f_name = "Reserved"
+                    
+                field = {
+                    "bits": bits,
+                    "name": f_name,
+                    "access": "rw",
+                    "reset": "0",
+                    "description": desc_clean
+                }
+                
+                # Update or append field
+                existing_field = next((f for f in register["fields"] if f["bits"] == bits), None)
+                if existing_field:
+                    existing_field.update(field)
+                else:
+                    register["fields"].append(field)
+
     def _parse_peripheral_table(self, table):
         """Extract peripheral base addresses."""
         print("[+] Found peripheral base address table")
@@ -133,7 +209,7 @@ class DatasheetParser:
         for idx, h in enumerate(headers):
             if "register" in h or "name" in h:
                 name_idx = idx
-            elif "offset" in h:
+            elif "offset" in h or "address" in h:
                 offset_idx = idx
             elif "reset" in h:
                 reset_idx = idx

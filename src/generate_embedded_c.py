@@ -12,8 +12,14 @@ import re
 
 def clean_name(name):
     """Clean register/peripheral names for C compatibility."""
+    # Strip parentheticals
+    name = re.sub(r'\(.*?\)', '', name)
     # Replace invalid C chars with underscore
     name = re.sub(r'[^a-zA-Z0-9_]', '_', name)
+    # Strip leading/trailing underscores
+    name = name.strip('_')
+    # Replace multiple underscores with single one
+    name = re.sub(r'_+', '_', name)
     # Ensure it doesn't start with a number
     if name and name[0].isdigit():
         name = "_" + name
@@ -62,16 +68,46 @@ def generate_header(data, peripheral_name):
             
     valid_registers.sort(key=lambda x: x[0])
     
+    # Check if offsets are actually absolute addresses
+    is_absolute = False
+    inferred_base = None
+    if valid_registers:
+        min_addr = valid_registers[0][0]
+        if min_addr >= 0x10000:
+            is_absolute = True
+            inferred_base = min_addr & ~0xFFF
+            
     # Get base address
-    base_addr = "0x40000000" # Default fallback
+    base_addr = None
     if peripheral_name in peripherals:
-        base_addr = peripherals[peripheral_name].get("base_address", base_addr)
+        base_addr = peripherals[peripheral_name].get("base_address", None)
     else:
         # Search case-insensitively
         for p_name, p_data in peripherals.items():
             if p_name.upper() == peripheral_name.upper():
-                base_addr = p_data.get("base_address", base_addr)
+                base_addr = p_data.get("base_address", None)
                 break
+                
+    if base_addr is not None:
+        base_addr_val = parse_offset(base_addr)
+    else:
+        if is_absolute:
+            base_addr_val = inferred_base
+            base_addr = f"0x{inferred_base:08X}"
+        else:
+            base_addr_val = 0
+            base_addr = "0x40000000" # Default fallback
+            
+    # Normalize offsets to be relative to the base address
+    normalized_registers = []
+    for offset_val, reg in valid_registers:
+        if is_absolute or offset_val >= base_addr_val:
+            rel_offset = offset_val - base_addr_val
+        else:
+            rel_offset = offset_val
+        normalized_registers.append((rel_offset, reg))
+        
+    valid_registers = normalized_registers
                 
     lines = [
         f"/**",

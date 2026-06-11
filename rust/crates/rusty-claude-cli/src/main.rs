@@ -70,7 +70,7 @@ use tools::{
     RuntimeToolDefinition, ToolSearchOutput,
 };
 
-const DEFAULT_MODEL: &str = "anthropic/claude-opus-4-7";
+const DEFAULT_MODEL: &str = "qwen2.5-coder:7b";
 
 /// #148: Model provenance for `danielou status` JSON/text output. Records where
 /// the resolved model string came from so danielous don't have to re-read argv
@@ -7684,13 +7684,13 @@ impl LiveCli {
             |path| path.display().to_string(),
         );
         format!(
-            "\x1b[38;5;196m\
- ██████╗██╗      █████╗ ██╗    ██╗\n\
-██╔════╝██║     ██╔══██╗██║    ██║\n\
-██║     ██║     ███████║██║ █╗ ██║\n\
-██║     ██║     ██╔══██║██║███╗██║\n\
-╚██████╗███████╗██║  ██║╚███╔███╔╝\n\
- ╚═════╝╚══════╝╚═╝  ╚═╝ ╚══╝╚══╝\x1b[0m \x1b[38;5;208mCode\x1b[0m 🦞\n\n\
+            "\x1b[38;5;205m\
+    __  ___ _                     __          __               \n\
+   /  |/  /(_)_____ ____ _ _____ / /___      / /___  __  __    \n\
+  / /|_/ // // ___// __ `// ___// // _ \\\\__  / // __ \\\\/ / / /    \n\
+ / /  / // // /   / /_/ // /__ / //  __/ /_/ // /_/ / /_/ /     \n\
+/_/  /_//_//_/    \\\\__,_/ \\\\___//_/ \\\\___/\\\\____/ \\\\____/\\\\__, /      \n\
+                                                   /____/       \x1b[0m \x1b[38;5;208mCode\x1b[0m ✨\n\n\
   \x1b[2mModel\x1b[0m            {}\n\
   \x1b[2mPermissions\x1b[0m      {}\n\
   \x1b[2mBranch\x1b[0m           {}\n\
@@ -15032,8 +15032,8 @@ mod tests {
     }
 
     #[test]
-    fn default_model_alias_uses_anthropic_routing_prefix() {
-        assert_eq!(DEFAULT_MODEL, "anthropic/claude-opus-4-7");
+    fn default_model_alias_uses_local_routing() {
+        assert_eq!(DEFAULT_MODEL, "qwen2.5-coder:7b");
         assert_eq!(resolve_model_alias("opus"), "anthropic/claude-opus-4-7");
     }
 
